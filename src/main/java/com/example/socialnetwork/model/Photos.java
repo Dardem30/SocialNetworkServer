@@ -1,12 +1,21 @@
 package com.example.socialnetwork.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
+@JsonSerialize
 @Table(name = "photos")
-public class Photos {
+public class Photos implements Serializable{
+    private static final long serialVersionUID = -417662671177241759L;
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +27,9 @@ public class Photos {
     private Integer userId;
     @Column(name = "likes")
     private int likes;
-
+    @OneToMany
+    @JoinColumn(name = "photo_id", referencedColumnName = "id")
+    private List<Comments> comments;
     public int getId() {
         return id;
     }
@@ -41,6 +52,14 @@ public class Photos {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public List<Comments> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comments> comments) {
+        this.comments = comments;
     }
 
     @Override

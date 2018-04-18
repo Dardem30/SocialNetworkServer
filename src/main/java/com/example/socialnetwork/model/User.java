@@ -38,9 +38,37 @@ public class User implements UserDetails {
     @OneToMany()
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<Photos> photos;
+    @OneToMany()
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private List<LikeTable> likeTables;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<Authority> authorities;
+    @OneToMany
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private List<Comments> comments;
+    @OneToMany
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private List<Answers> answers;
+    @OneToMany
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private List<Message> messages;
+
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+    }
+
+    public List<Answers> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<Answers> answers) {
+        this.answers = answers;
+    }
 
     @Column(name = "account_non_expired")
     private boolean accountNonExpired;
@@ -167,5 +195,21 @@ public class User implements UserDetails {
 
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public List<LikeTable> getLikeTables() {
+        return likeTables;
+    }
+
+    public List<Comments> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comments> comments) {
+        this.comments = comments;
+    }
+
+    public void setLikeTables(List<LikeTable> likeTables) {
+        this.likeTables = likeTables;
     }
 }

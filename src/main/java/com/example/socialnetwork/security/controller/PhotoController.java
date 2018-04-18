@@ -1,10 +1,13 @@
 package com.example.socialnetwork.security.controller;
 
-import com.example.socialnetwork.model.Photos;
-import com.example.socialnetwork.model.User;
+import com.example.socialnetwork.model.*;
+import com.example.socialnetwork.security.dto.PhotoDTO;
 import com.example.socialnetwork.security.dto.UserDto;
-import com.example.socialnetwork.security.service.PhotosService;
-import com.example.socialnetwork.security.service.UserService;
+import com.example.socialnetwork.security.service.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.dozer.DozerBeanMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,12 @@ public class PhotoController {
     private PhotosService photosService;
     @Autowired
     private DozerBeanMapper dozerBeanMapper;
+    @Autowired
+    private LikeTableService likeTableService;
+    @Autowired
+    private CommentsService commentsService;
+    @Autowired
+    private AnswersService answersService;
     @PostMapping(value = "/photo",headers = "content-type=multipart/*")
     public ResponseEntity<User> savePhoto(@RequestParam("file")MultipartFile multipartFile,@RequestParam("username") String username) throws IOException {
         Photos photos=new Photos();
@@ -50,11 +59,55 @@ return new ResponseEntity<User>(userToResponse, HttpStatus.OK);
         return ResponseEntity.ok().body(photosService.fetchPhotosOfUser(userId));
     }
     @PostMapping(value = "/photo/like/{id}")
-    public ResponseEntity<Photos> like(@PathVariable int id,@RequestParam("username") String username){
-
+    public ResponseEntity<Boolean> like(@PathVariable int id,@RequestParam("username") String username){
+        User user=userService.getUserByUsername(username);
+        for(LikeTable likeTable:user.getLikeTables()){
+            if(likeTable.getPhotoId()==id){
                 Photos photos = photosService.findPhotoById(id);
-                photos.setLikes(photos.getLikes()+ 1);
+                photos.setLikes(photos.getLikes()- 1);
                 photosService.savePhoto(photos);
-                return new ResponseEntity<Photos>(photos, HttpStatus.OK);
+                likeTableService.deleteLikeById(id);
+                return new ResponseEntity(false, HttpStatus.OK);
+            }
+        }
+        Photos photos = photosService.findPhotoById(id);
+        photos.setLikes(photos.getLikes()+ 1);
+        photosService.savePhoto(photos);
+        LikeTable likeTable=new LikeTable();
+        likeTable.setPhotoId(id);
+        likeTable.setUserId(user.getId());
+        likeTableService.saveLike(likeTable);
+        return new ResponseEntity(true, HttpStatus.OK);
+    }
+    @GetMapping(value = "/photo/{photoId}")
+    public ResponseEntity<PhotoDTO> getPhoto(@PathVariable int photoId){
+        Photos photos=photosService.findPhotoById(photoId);
+        PhotoDTO response = dozerBeanMapper.map(photos, PhotoDTO.class);
+        return new ResponseEntity<PhotoDTO>(response,HttpStatus.OK);
+    }
+    @PostMapping(value = "/comment/{photoId}")
+    public ResponseEntity<Comments> save(@PathVariable int photoId, @RequestParam("username") String username, @RequestParam("text")String text){
+        User user=userService.getUserByUsername(username);
+        Comments comments=new Comments();
+        comments.setText(text);
+        comments.setPhotoId(photosService.findPhotoById(photoId).getId());
+        comments.setUserId(user.getId());
+        comments.setNameuser(user.getName());
+        comments.setSurnameuser(user.getSurname());
+        commentsService.saveComment(comments);
+        return new ResponseEntity<Comments>(comments, HttpStatus.OK);
+    }
+    @PostMapping(value = "/answer/{commentId}")
+    public ResponseEntity<Answers> saveAns(@PathVariable int commentId,@RequestParam("username") String username, @RequestParam("text")String text){
+        User user=userService.getUserByUsername(username);
+        Answers answers=new Answers();
+        answers.setCommentId(commentId);
+        answers.setText(text);
+        answers.setUserId(user.getId());
+        answers.setNameuser(user.getName());
+        answers.setSurnameuser(user.getSurname());
+        answersService.saveAnswer(answers);
+        return new ResponseEntity<Answers>(answers,HttpStatus.OK);
+
     }
 }

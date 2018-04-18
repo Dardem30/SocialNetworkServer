@@ -81,6 +81,13 @@ public class DefaultUserService implements UserService {
 
         return userRepository.findAll();
     }
+    @Override
+    public List<User> listUsersByName(String name) {
 
 
+        return userRepository.findAllByName(name);
     }
+
+
+
+}

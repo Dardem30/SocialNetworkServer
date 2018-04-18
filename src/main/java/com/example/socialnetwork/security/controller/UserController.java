@@ -2,10 +2,12 @@ package com.example.socialnetwork.security.controller;
 
 
 //import com.example.socialnetwork.model.Photos;
+import com.example.socialnetwork.model.Message;
 import com.example.socialnetwork.model.Photos;
 import com.example.socialnetwork.model.User;
 import com.example.socialnetwork.security.dto.UserDto;
 import com.example.socialnetwork.security.repository.PhotosRepository;
+import com.example.socialnetwork.security.service.MessageService;
 import com.example.socialnetwork.security.service.PhotosService;
 import com.example.socialnetwork.security.service.UserService;
 import org.dozer.DozerBeanMapper;
@@ -29,7 +31,8 @@ public class UserController {
 
     @Autowired
     private DozerBeanMapper dozerBeanMapper;
-
+    @Autowired
+    private MessageService messageService;
     /**
      * Method for create new User.
      *
@@ -116,6 +119,21 @@ public class UserController {
 
         return ResponseEntity.ok().body(response);
     }
+    @RequestMapping(value = "/usersName/{name}", method = RequestMethod.GET)
+    public ResponseEntity fetchAllByName(@PathVariable String name) {
+        final List<UserDto> response = new ArrayList<>();
+        userService.listUsersByName(name)
+                .forEach(user ->  response.add(dozerBeanMapper.map(user, UserDto.class)));
 
+        return ResponseEntity.ok().body(response);
+    }
+    @PostMapping(value = "/sendMessage/{userId}")
+    public ResponseEntity<Message> saveMessage(@PathVariable int userId,@RequestParam("text") String text){
+        Message message=new Message();
+        message.setText(text);
+        message.setUserId(userId);
+        messageService.saveMessage(message);
+        return new ResponseEntity<Message>(message,HttpStatus.OK);
+    }
 
 }
