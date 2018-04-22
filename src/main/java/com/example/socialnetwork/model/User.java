@@ -53,6 +53,20 @@ public class User implements UserDetails {
     @OneToMany
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<Message> messages;
+    @OneToMany
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private List<Friends> friends;
+    @OneToMany
+    @JoinColumn(name = "user_name", referencedColumnName = "name")
+    private List<Message> messages1;
+
+    public List<Message> getMessages1() {
+        return messages1;
+    }
+
+    public void setMessages1(List<Message> messages1) {
+        this.messages1 = messages1;
+    }
 
     public List<Message> getMessages() {
         return messages;

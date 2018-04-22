@@ -1,7 +1,9 @@
 package com.example.socialnetwork.security.dto;
 
 //import com.example.socialnetwork.model.Photos;
+import com.example.socialnetwork.model.Friends;
 import com.example.socialnetwork.model.LikeTable;
+import com.example.socialnetwork.model.Message;
 import com.example.socialnetwork.model.Photos;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,6 +46,26 @@ public class UserDto implements Serializable {
     private List<AuthorityDto> authorities;
     @JsonProperty
     private List<LikeTable> likeTables;
+    @JsonProperty
+    private List<Message> messages;
+    @JsonProperty
+    private List<Friends> friends;
+
+    public List<Friends> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(List<Friends> friends) {
+        this.friends = friends;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+    }
 
     public List<LikeTable> getLikeTables() {
         return likeTables;

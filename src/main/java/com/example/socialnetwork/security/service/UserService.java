@@ -57,6 +57,8 @@ public interface UserService {
      *
      * @return List of User user.
      */
+
     List<User> listUsers();
     List<User> listUsersByName(String name);
+    User findByName(String name);
 }

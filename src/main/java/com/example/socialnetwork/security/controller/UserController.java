@@ -2,11 +2,13 @@ package com.example.socialnetwork.security.controller;
 
 
 //import com.example.socialnetwork.model.Photos;
+import com.example.socialnetwork.model.Friends;
 import com.example.socialnetwork.model.Message;
 import com.example.socialnetwork.model.Photos;
 import com.example.socialnetwork.model.User;
 import com.example.socialnetwork.security.dto.UserDto;
 import com.example.socialnetwork.security.repository.PhotosRepository;
+import com.example.socialnetwork.security.service.FriendService;
 import com.example.socialnetwork.security.service.MessageService;
 import com.example.socialnetwork.security.service.PhotosService;
 import com.example.socialnetwork.security.service.UserService;
@@ -19,11 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
-/**
- * Rest Controller for User.
- */
+
 @RestController
 public class UserController {
     @Autowired
@@ -33,12 +35,8 @@ public class UserController {
     private DozerBeanMapper dozerBeanMapper;
     @Autowired
     private MessageService messageService;
-    /**
-     * Method for create new User.
-     *
-     * @param userDto UserDto userDto.
-     * @return UserDto response from created User.
-     */
+    @Autowired
+    private FriendService friendService;
     @RequestMapping(value = "/users", method = RequestMethod.POST)
     public ResponseEntity create(@RequestBody final UserDto userDto) {
 
@@ -51,12 +49,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Method for update User from database.
-     *
-     * @param userDto UserDto userDto.
-     * @return UserDto response from updated User.
-     */
+
     @RequestMapping(value = "/users", method = RequestMethod.PUT)
     public ResponseEntity update(@RequestBody final UserDto userDto) {
 
@@ -77,12 +70,7 @@ public class UserController {
         return ResponseEntity.ok().body(response);
     }
 
-    /**
-     * Method for fetch user by Id.
-     *
-     * @param userId User userId.
-     * @return UserDto response from displayed User.
-     */
+
     @RequestMapping(value = "/users/{userId}", method = RequestMethod.GET)
     public ResponseEntity fetch(@PathVariable final Integer userId) {
 
@@ -102,12 +90,7 @@ public class UserController {
 
         return ResponseEntity.ok().body(response);
     }
-    /**
-     * Method for delete user by Id.
-     *
-     * @param userId User userId.
-     * @return UserDto response from deleted User.
-     */
+
     @RequestMapping(value = "/users/{userId}", method = RequestMethod.DELETE)
     public ResponseEntity delete(@PathVariable final Integer userId) {
 
@@ -128,12 +111,53 @@ public class UserController {
         return ResponseEntity.ok().body(response);
     }
     @PostMapping(value = "/sendMessage/{userId}")
-    public ResponseEntity<Message> saveMessage(@PathVariable int userId,@RequestParam("text") String text){
+    public ResponseEntity<Message> saveMessage(@PathVariable int userId,@RequestParam("text") String text,@RequestParam("name") String name){
         Message message=new Message();
         message.setText(text);
         message.setUserId(userId);
+        message.setUserName(name);
+        message.setDate(new Date());
         messageService.saveMessage(message);
         return new ResponseEntity<Message>(message,HttpStatus.OK);
+    }
+    @GetMapping(value = "/dialogTree/{userId}/{userName}")
+    public ResponseEntity<List<Message>> messages(@PathVariable int userId, @PathVariable String userName){
+        User user=userService.findByName(userName);
+        User user1=userService.fetch(userId);
+        List<Message> messageList=new ArrayList<>();
+        user.getMessages1().forEach(message -> messageList.add(message));
+        user1.getMessages1().forEach(message -> messageList.add(message));
+        Collections.sort(messageList);
+        Collections.reverse(messageList);
+        Collections.reverse(messageList);
+        return new ResponseEntity<List<Message>>(messageList,HttpStatus.OK);
+    }
+    @PostMapping(value = "/addFriend/{friendId}")
+    public ResponseEntity<Friends> addFriend(@PathVariable int friendId, @RequestParam("username") String username){
+        User user=userService.getUserByUsername(username);
+         return new ResponseEntity<Friends>(friendService.save(user,friendId),HttpStatus.OK);
+    }
+    @GetMapping(value = "/findAllFriend/{userId}")
+    public ResponseEntity<List<Friends>> listFriends(@PathVariable int userId){
+        int c=0;
+        List<Friends> response=new ArrayList<>();
+        List<Friends> friendsList=friendService.findAllByUserId(userId);
+        for(Friends friends: friendsList){
+            User user=userService.findByName(friends.getName());
+            List<Friends> friendsList1=friendService.findAllByUserId(user.getId());
+            for(Friends friends1: friendsList1){
+                if(friends1.getName()==userService.fetch(userId).getName()){
+                    c++;
+                }
+            }
+            if(c==0){
+                response.add(friends);
+                c=0;
+            }else{
+                c=0;
+            }
+        }
+        return new ResponseEntity<List<Friends>>(response,HttpStatus.OK);
     }
 
 }

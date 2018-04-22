@@ -34,7 +34,6 @@ public class SignUpController {
      */
     @RequestMapping(value = "/signUp", method = RequestMethod.POST)
     public ResponseEntity create(@RequestBody final UserDto dto) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         dto.setDate(date);
         final User userToSave = dozerBeanMapper.map(dto, User.class);
