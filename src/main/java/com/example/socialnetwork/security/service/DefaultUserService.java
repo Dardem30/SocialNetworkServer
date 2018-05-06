@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Class that implements the User's work and databases.
@@ -90,6 +91,10 @@ public class DefaultUserService implements UserService {
     @Override
     public User findByName(String name){
         return userRepository.findByName(name);
+    }
+    @Override
+    public Optional<User> findById(int id){
+        return userRepository.findById(id);
     }
 
 

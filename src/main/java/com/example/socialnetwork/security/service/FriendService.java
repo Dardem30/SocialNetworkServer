@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -23,5 +24,11 @@ public class FriendService {
     }
     public List<Friends> findAllByUserId(int userId){
         return friendRepository.findAllByUserId(userId);
+    }
+    public Friends findByName(String name){
+        return friendRepository.findByName(name);
+    }
+    public Optional<Friends> findById(int id){
+        return friendRepository.findById(id);
     }
 }

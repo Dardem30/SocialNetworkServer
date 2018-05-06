@@ -7,6 +7,7 @@ package com.example.socialnetwork.security.service;
 import com.example.socialnetwork.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Interface for User work with database.
@@ -61,4 +62,5 @@ public interface UserService {
     List<User> listUsers();
     List<User> listUsersByName(String name);
     User findByName(String name);
+    Optional<User> findById(int id);
 }

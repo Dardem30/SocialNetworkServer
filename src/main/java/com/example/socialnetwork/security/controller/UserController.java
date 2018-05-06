@@ -20,10 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 @RestController
@@ -137,8 +134,14 @@ public class UserController {
         User user=userService.getUserByUsername(username);
          return new ResponseEntity<Friends>(friendService.save(user,friendId),HttpStatus.OK);
     }
-    @GetMapping(value = "/findAllFriend/{userId}")
-    public ResponseEntity<List<Friends>> listFriends(@PathVariable int userId){
+    @PostMapping(value = "/confirm/{name}")
+    public ResponseEntity<Friends> addFriend(@PathVariable String name, @RequestParam("username") String username){
+        User user=userService.getUserByUsername(username);
+        User user1=userService.findByName(name);
+         return new ResponseEntity<Friends>(friendService.save(user,user1.getId()),HttpStatus.OK);
+    }
+    @GetMapping(value = "/findAllUnconfermdFriend/{userId}")
+    public ResponseEntity<List<Friends>> listUncomfermedFriends(@PathVariable int userId){
         int c=0;
         List<Friends> response=new ArrayList<>();
         List<Friends> friendsList=friendService.findAllByUserId(userId);
@@ -146,18 +149,22 @@ public class UserController {
             User user=userService.findByName(friends.getName());
             List<Friends> friendsList1=friendService.findAllByUserId(user.getId());
             for(Friends friends1: friendsList1){
-                if(friends1.getName()==userService.fetch(userId).getName()){
+                Optional<User> user1 =userService.findById(userId);
+                if(friends1.getName().equals(user1.get().getName())
+                        && friends1.getUserId()==user.getId()){
                     c++;
                 }
             }
             if(c==0){
                 response.add(friends);
-                c=0;
             }else{
                 c=0;
             }
         }
         return new ResponseEntity<List<Friends>>(response,HttpStatus.OK);
     }
-
+    @GetMapping(value = "/findAllFriends/{userId}")
+    public ResponseEntity<List<Friends>> listFriends(@PathVariable int userId){
+        return new ResponseEntity<List<Friends>>(friendService.findAllByUserId(userId),HttpStatus.OK);
+    }
 }

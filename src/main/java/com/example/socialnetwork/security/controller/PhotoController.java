@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin
@@ -34,6 +35,8 @@ public class PhotoController {
     private CommentsService commentsService;
     @Autowired
     private AnswersService answersService;
+    @Autowired
+    private FriendService friendService;
     @PostMapping(value = "/photo",headers = "content-type=multipart/*")
     public ResponseEntity<User> savePhoto(@RequestParam("file")MultipartFile multipartFile,@RequestParam("username") String username) throws IOException {
         Photos photos=new Photos();
@@ -109,5 +112,11 @@ return new ResponseEntity<User>(userToResponse, HttpStatus.OK);
         answersService.saveAnswer(answers);
         return new ResponseEntity<Answers>(answers,HttpStatus.OK);
 
+    }
+    @GetMapping(value = "/friendPhoto/{friendId}")
+    public ResponseEntity<List<Photos>> friendPhoto(@PathVariable int friendId){
+        Optional<Friends> friends=friendService.findById(friendId);
+        User user=userService.findByName(friends.get().getName());
+        return new ResponseEntity<List<Photos>>(photosService.fetchPhotosOfUser(user.getId()),HttpStatus.OK);
     }
 }
