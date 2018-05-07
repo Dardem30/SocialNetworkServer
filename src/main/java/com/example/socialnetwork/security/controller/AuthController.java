@@ -46,7 +46,7 @@ public class AuthController {
         if (token.isPresent()) {
             final TokenDto response = new TokenDto();
             response.setToken(token.get());
-            System.out.println("token was sended");
+            System.out.println("token were sent");
             return ResponseEntity.ok().header("access-token", response.getToken())
                     .body("Succeful");
         } else {
